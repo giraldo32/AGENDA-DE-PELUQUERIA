@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id              String   @id @default(cuid()) @map("id")
+  nombreUsuario   String   @unique @map("nombre_usuario")
+  contrasenaHash  String   @map("contrasena_hash")
+  rol             String   @default("ADMIN") @map("rol")
+  fechaCreacion   DateTime @default(now()) @map("fecha_creacion")
+  fechaActualizacion DateTime @updatedAt @map("fecha_actualizacion")
+
+  @@map("usuarios")
+}
+
+model Cita {
+  id                 String   @id @default(cuid()) @map("id")
+  nombreCliente      String   @map("nombre_cliente")
+  telefono           String   @map("telefono")
+  tipoCorte          String   @map("tipo_corte")
+  incluyeBarba       Boolean  @default(false) @map("incluye_barba")
+  incluyeCejas       Boolean  @default(false) @map("incluye_cejas")
+  fechaCita          String   @map("fecha_cita")
+  horaCita           String   @map("hora_cita")
+  notas              String?  @map("notas")
+  precioEstimado     Int      @map("precio_estimado")
+  estado             String   @default("PENDIENTE") @map("estado")
+  fechaCreacion      DateTime @default(now()) @map("fecha_creacion")
+  fechaActualizacion DateTime @updatedAt @map("fecha_actualizacion")
+
+  @@index([fechaCita, horaCita])
+  @@index([nombreCliente])
+  @@map("citas")
+}

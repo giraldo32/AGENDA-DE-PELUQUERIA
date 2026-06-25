@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: agenda-peluqueria-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: agenda_peluqueria
+    ports:
+      - "5432:5432"
+    volumes:
+      - agenda_peluqueria_pgdata:/var/lib/postgresql/data
+
+volumes:
+  agenda_peluqueria_pgdata:

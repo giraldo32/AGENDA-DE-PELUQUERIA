@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7f4ed;
+  --foreground: #102018;
+  --surface: rgba(255, 255, 255, 0.74);
+  --muted: #6b7280;
+  --border: rgba(16, 32, 24, 0.12);
+  --accent: #1b5e20;
+  --accent-soft: #dfead8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--foreground);
+  background:
+    radial-gradient(circle at top left, rgba(224, 143, 28, 0.18), transparent 36%),
+    radial-gradient(circle at top right, rgba(27, 94, 32, 0.18), transparent 30%),
+    linear-gradient(180deg, #faf7f0 0%, #f4f0e7 100%);
+  font-family: var(--font-body), sans-serif;
+}
+
+@layer components {
+  .input {
+    @apply w-full rounded-2xl border border-[var(--border)] bg-white/90 px-4 py-3 text-sm text-[var(--foreground)] outline-none transition placeholder:text-slate-400 focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-soft)];
+  }
+
+  .option-card {
+    @apply flex cursor-pointer items-start gap-3 rounded-3xl border border-[var(--border)] bg-white/80 p-4 transition hover:border-[var(--accent)] hover:bg-white;
+  }
+
+  .option-card input {
+    @apply mt-1 h-4 w-4 rounded border-slate-300 text-[var(--accent)] focus:ring-[var(--accent-soft)];
+  }
+
+  .option-card strong {
+    @apply block text-sm font-semibold text-[var(--foreground)];
+  }
+
+  .option-card small {
+    @apply mt-1 block text-xs leading-5 text-[var(--muted)];
+  }
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading), sans-serif;
+  letter-spacing: -0.03em;
+}
+
+::selection {
+  background: #1b5e20;
+  color: white;
+}
