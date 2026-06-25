@@ -1,5 +1,5 @@
 import { BookingForm } from "@/components/booking-form";
-import { Scissors, ShieldCheck, Sparkles } from "lucide-react";
+import { MapPin, Scissors, ShieldCheck, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 const highlights = [
@@ -27,7 +27,12 @@ export default function HomePage() {
         <div className="space-y-8">
           <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/70 px-4 py-2 text-sm font-medium text-[var(--accent)] shadow-sm backdrop-blur">
             <span className="h-2 w-2 rounded-full bg-[#d97706]" />
-            Agenda digital para peluquería con precios automáticos
+            Barbería Stiven - agenda digital con precios automáticos
+          </div>
+
+          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/80 px-4 py-2 text-sm font-medium text-[var(--foreground)] shadow-sm backdrop-blur">
+            <MapPin className="h-4 w-4 text-[var(--accent)]" />
+            Conquistadores, El Peñol, Antioquia
           </div>
 
           <div className="flex flex-wrap gap-3">
@@ -47,10 +52,10 @@ export default function HomePage() {
 
           <div className="space-y-5">
             <h1 className="max-w-2xl text-5xl leading-none text-[var(--foreground)] sm:text-6xl lg:text-7xl">
-              Reserva tu cita para cortes, barba y cejas con una experiencia clara y rápida.
+              Reserva tu cita en Barbería Stiven con una experiencia clara y rápida.
             </h1>
             <p className="max-w-2xl text-lg leading-8 text-[var(--muted)] sm:text-xl">
-              El cliente escribe el tipo de corte, elige la fecha y la hora, y recibe un valor estimado antes de confirmar la cita.
+              El cliente elige el estilo, añade barba o cejas, selecciona la fecha y la hora, y recibe un valor estimado antes de confirmar la cita.
             </p>
           </div>
 

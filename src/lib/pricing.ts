@@ -1,17 +1,27 @@
-const haircutRates: Array<{ terms: string[]; price: number }> = [
-  { terms: ["premium", "barber pro", "diseño", "design", "vip"], price: 28000 },
-  { terms: ["fade", "degradado", "taper", "low fade", "high fade"], price: 22000 },
-  { terms: ["undercut", "crop", "pompadour"], price: 24000 },
-  { terms: ["niño", "kids", "infantil"], price: 14000 },
-  { terms: ["barba", "beard"], price: 18000 },
-  { terms: ["clásico", "clasico", "normal", "sencillo", "regular"], price: 16000 },
+export const beardAddOnPrice = 10000;
+export const eyebrowsAddOnPrice = 10000;
+
+export const haircutPackages = [
+  { key: "corte", label: "Corte", price: 20000 },
+  { key: "solo-barba", label: "Solo barba", price: 8000 },
+  { key: "solo-cejas", label: "Solo cejas", price: 5000 },
+  { key: "base", label: "Base", price: 18000 },
+  { key: "base-barba", label: "Base y barba", price: 26000 },
+  { key: "base-cejas", label: "Base y cejas", price: 23000 },
+  { key: "base-barba-cejas", label: "Base, cejas y barba", price: 28000 },
+] as const;
+
+const haircutRates: Array<{ terms: string[]; price: number; label: string }> = [
+  { terms: ["corte"], price: 20000, label: "Corte" },
+  { terms: ["solo barba"], price: 8000, label: "Solo barba" },
+  { terms: ["solo cejas"], price: 5000, label: "Solo cejas" },
+  { terms: ["base, cejas y barba", "base cejas y barba", "base barba y cejas", "base barba cejas"], price: 28000, label: "Base, cejas y barba" },
+  { terms: ["base y barba", "base barba"], price: 26000, label: "Base y barba" },
+  { terms: ["base y cejas", "base cejas"], price: 23000, label: "Base y cejas" },
+  { terms: ["base"], price: 18000, label: "Base" },
 ];
 
-const fallbackPrice = 20000;
-const beardAddOn = 8000;
-const eyebrowsAddOn = 5000;
-export const beardAddOnPrice = beardAddOn;
-export const eyebrowsAddOnPrice = eyebrowsAddOn;
+const fallbackPrice = 18000;
 
 export function estimateHaircutPrice(options: {
   haircutType: string;
@@ -23,21 +33,14 @@ export function estimateHaircutPrice(options: {
     terms.some((term) => normalized.includes(term)),
   );
 
-  let price = baseMatch?.price ?? fallbackPrice;
-
-  if (options.includeBeard) {
-    price += beardAddOnPrice;
-  }
-
-  if (options.includeEyebrows) {
-    price += eyebrowsAddOnPrice;
-  }
+  const price = baseMatch?.price ?? fallbackPrice;
 
   return {
     basePrice: baseMatch?.price ?? fallbackPrice,
     estimatedPrice: price,
     breakdown: {
       haircutType: options.haircutType,
+      baseLabel: baseMatch?.label ?? "Base",
       includeBeard: Boolean(options.includeBeard),
       includeEyebrows: Boolean(options.includeEyebrows),
       beardAddOn: options.includeBeard ? beardAddOnPrice : 0,

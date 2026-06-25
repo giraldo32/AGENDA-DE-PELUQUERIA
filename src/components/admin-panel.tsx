@@ -2,7 +2,7 @@
 
 import type { FormEvent, ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
-import { LockKeyhole, LogOut, RefreshCcw } from "lucide-react";
+import { Check, LockKeyhole, LogOut, RefreshCcw, X } from "lucide-react";
 import { readJsonResponse } from "@/lib/http";
 
 type Booking = {
@@ -19,6 +19,19 @@ type Booking = {
   estado: string;
   fechaCreacion: string;
 };
+
+type BookingStatus = "PENDIENTE" | "CONFIRMADA" | "CANCELADA";
+
+function statusStyle(status: string) {
+  switch (status) {
+    case "CONFIRMADA":
+      return "bg-emerald-100 text-emerald-900";
+    case "CANCELADA":
+      return "bg-rose-100 text-rose-900";
+    default:
+      return "bg-amber-100 text-amber-900";
+  }
+}
 
 export function AdminPanel() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -85,6 +98,23 @@ export function AdminPanel() {
   }
 
   async function refreshBookings() {
+    await loadBookings();
+  }
+
+  async function updateBookingStatus(id: string, estado: BookingStatus) {
+    const response = await fetch(`/api/bookings/${id}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ estado }),
+    });
+
+    if (!response.ok) {
+      const error = await readJsonResponse<{ message?: string }>(response);
+      setMessage(error.message ?? "No se pudo actualizar el estado.");
+      return;
+    }
+
+    setMessage(estado === "CONFIRMADA" ? "Cita confirmada correctamente." : "Cita cancelada correctamente.");
     await loadBookings();
   }
 
@@ -182,6 +212,7 @@ export function AdminPanel() {
                 <th className="px-4 py-3">Extras</th>
                 <th className="px-4 py-3">Precio</th>
                 <th className="px-4 py-3">Estado</th>
+                <th className="px-4 py-3">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border)]">
@@ -201,7 +232,29 @@ export function AdminPanel() {
                     {!cita.incluyeBarba && !cita.incluyeCejas ? "Ninguno" : ""}
                   </td>
                   <td className="px-4 py-4 font-semibold">${cita.precioEstimado.toLocaleString("es-CO")}</td>
-                  <td className="px-4 py-4">{cita.estado}</td>
+                  <td className="px-4 py-4">
+                    <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusStyle(cita.estado)}`}>
+                      {cita.estado}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => updateBookingStatus(cita.id, "CONFIRMADA")}
+                        className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90"
+                      >
+                        <Check className="h-3.5 w-3.5" />
+                        Confirmar
+                      </button>
+                      <button
+                        onClick={() => updateBookingStatus(cita.id, "CANCELADA")}
+                        className="inline-flex items-center gap-2 rounded-2xl bg-rose-600 px-3 py-2 text-xs font-semibold text-white transition hover:opacity-90"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                        Cancelar
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
