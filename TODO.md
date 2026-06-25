@@ -1,0 +1,6 @@
+- [x] Actualizar src/lib/pricing.ts para agregar paquetes/botones alias:
+  - [x] “Corte completo” (20000)
+  - [x] “Corte y barba” (28000)
+  - [x] “Barba y cejas” (28000)
+- [x] Actualizar src/components/booking-form.tsx para que toggleBeard/toggleEyebrows no caigan a keys inexistentes al usar esos aliases.
+- [x] Verificar que el flujo de creación de reserva no se rompe y que el admin-panel mantiene funcionando “Confirmar” y “Cancelar”.

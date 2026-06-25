@@ -38,6 +38,7 @@ const initialDate = new Date().toISOString().slice(0, 10);
 function toggleBeard(service: ServiceKey): ServiceKey {
   switch (service) {
     case "corte":
+    case "corte-completo":
       return "solo-barba";
     case "solo-barba":
       return "corte";
@@ -50,6 +51,9 @@ function toggleBeard(service: ServiceKey): ServiceKey {
     case "base-cejas":
       return "base-barba-cejas";
     case "base-barba-cejas":
+    case "corte-y-barba":
+    case "barba-y-cejas":
+      // Quitando barba, volvemos a la variante sin barba equivalente
       return "base-cejas";
     default:
       return service;
@@ -59,6 +63,7 @@ function toggleBeard(service: ServiceKey): ServiceKey {
 function toggleEyebrows(service: ServiceKey): ServiceKey {
   switch (service) {
     case "corte":
+    case "corte-completo":
       return "solo-cejas";
     case "solo-cejas":
       return "corte";
@@ -71,6 +76,9 @@ function toggleEyebrows(service: ServiceKey): ServiceKey {
     case "base-barba":
       return "base-barba-cejas";
     case "base-barba-cejas":
+    case "corte-y-barba":
+    case "barba-y-cejas":
+      // Quitando cejas, volvemos a la variante equivalente sin cejas
       return "base-barba";
     default:
       return service;

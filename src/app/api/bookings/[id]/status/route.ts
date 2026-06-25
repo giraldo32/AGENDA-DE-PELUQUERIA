@@ -4,7 +4,7 @@ import { getAdminSessionFromCookies } from "@/lib/auth";
 
 const allowedStatuses = new Set(["PENDIENTE", "CONFIRMADA", "CANCELADA"]);
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getAdminSessionFromCookies();
 
@@ -12,7 +12,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       return NextResponse.json({ message: "No autorizado" }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const estado = body?.estado;
 

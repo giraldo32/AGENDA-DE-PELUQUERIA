@@ -3,19 +3,36 @@ export const eyebrowsAddOnPrice = 10000;
 
 export const haircutPackages = [
   { key: "corte", label: "Corte", price: 20000 },
+  { key: "corte-completo", label: "Corte completo", price: 20000 },
   { key: "solo-barba", label: "Solo barba", price: 8000 },
   { key: "solo-cejas", label: "Solo cejas", price: 5000 },
   { key: "base", label: "Base", price: 18000 },
   { key: "base-barba", label: "Base y barba", price: 26000 },
+  { key: "corte-y-barba", label: "Corte y barba", price: 28000 },
   { key: "base-cejas", label: "Base y cejas", price: 23000 },
+  { key: "barba-y-cejas", label: "Barba y cejas", price: 28000 },
   { key: "base-barba-cejas", label: "Base, cejas y barba", price: 28000 },
 ] as const;
 
 const haircutRates: Array<{ terms: string[]; price: number; label: string }> = [
-  { terms: ["corte"], price: 20000, label: "Corte" },
+  { terms: ["corte", "corte completo"], price: 20000, label: "Corte completo" },
   { terms: ["solo barba"], price: 8000, label: "Solo barba" },
   { terms: ["solo cejas"], price: 5000, label: "Solo cejas" },
-  { terms: ["base, cejas y barba", "base cejas y barba", "base barba y cejas", "base barba cejas"], price: 28000, label: "Base, cejas y barba" },
+  {
+    terms: ["corte y barba"],
+    price: 28000,
+    label: "Corte y barba",
+  },
+  {
+    terms: ["barba y cejas"],
+    price: 28000,
+    label: "Barba y cejas",
+  },
+  {
+    terms: ["base, cejas y barba", "base cejas y barba", "base barba y cejas", "base barba cejas"],
+    price: 28000,
+    label: "Base, cejas y barba",
+  },
   { terms: ["base y barba", "base barba"], price: 26000, label: "Base y barba" },
   { terms: ["base y cejas", "base cejas"], price: 23000, label: "Base y cejas" },
   { terms: ["base"], price: 18000, label: "Base" },
