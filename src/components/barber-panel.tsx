@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
-import { Scissors, RefreshCcw } from "lucide-react";
+import { MapPin, RefreshCcw, Scissors } from "lucide-react";
 import { readJsonResponse } from "@/lib/http";
 
 type Cita = {
@@ -57,6 +57,10 @@ export function BarberPanel() {
             <h1 className="text-4xl text-[var(--foreground)]">Agenda de clientes</h1>
             <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
               Vista de solo lectura para revisar citas agendadas, servicios y observaciones.
+            </p>
+            <p className="mt-3 flex items-center gap-2 text-sm text-[var(--foreground)]">
+              <MapPin className="h-4 w-4 text-[var(--accent)]" />
+              Conquistadores, El Peñol, Antioquia
             </p>
           </div>
           <button

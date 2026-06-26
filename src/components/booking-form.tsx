@@ -2,23 +2,93 @@
 
 import type { ComponentType, FormEvent, ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarDays, Clock3, LoaderCircle, Phone, User } from "lucide-react";
-import { availableTimeSlots, estimateHaircutPrice } from "@/lib/pricing";
-import { beardAddOnPrice, eyebrowsAddOnPrice } from "@/lib/pricing";
+import { CalendarDays, CheckCircle2, Clock3, Eye, LoaderCircle, MapPin, Phone, Plus, Scissors, Sparkles, User } from "lucide-react";
+import { availableTimeSlots, beardAddOnPrice, eyebrowsAddOnPrice, estimateHaircutPrice, haircutPackages } from "@/lib/pricing";
 import { readJsonResponse } from "@/lib/http";
 
 type AvailabilityResponse = {
   bookedTimes: string[];
 };
 
+type BookingResponse = {
+  cita: {
+    id: string;
+    nombreCliente: string;
+    telefono: string;
+    tipoCorte: string;
+    incluyeBarba: boolean;
+    incluyeCejas: boolean;
+    fechaCita: string;
+    horaCita: string;
+    notas?: string | null;
+    precioEstimado: number;
+    estado: string;
+  };
+};
+
+type ServiceKey = (typeof haircutPackages)[number]["key"];
+
+const serviceByKey = Object.fromEntries(haircutPackages.map((option) => [option.key, option])) as Record<
+  ServiceKey,
+  (typeof haircutPackages)[number]
+>;
+
 const initialDate = new Date().toISOString().slice(0, 10);
+
+function toggleBeard(service: ServiceKey): ServiceKey {
+  switch (service) {
+    case "corte":
+    case "corte-completo":
+      return "solo-barba";
+    case "solo-barba":
+      return "corte";
+    case "solo-cejas":
+      return "base-barba-cejas";
+    case "base":
+      return "base-barba";
+    case "base-barba":
+      return "base";
+    case "base-cejas":
+      return "base-barba-cejas";
+    case "base-barba-cejas":
+    case "corte-y-barba":
+    case "barba-y-cejas":
+      // Quitando barba, volvemos a la variante sin barba equivalente
+      return "base-cejas";
+    default:
+      return service;
+  }
+}
+
+function toggleEyebrows(service: ServiceKey): ServiceKey {
+  switch (service) {
+    case "corte":
+    case "corte-completo":
+      return "solo-cejas";
+    case "solo-cejas":
+      return "corte";
+    case "solo-barba":
+      return "base-barba-cejas";
+    case "base":
+      return "base-cejas";
+    case "base-cejas":
+      return "base";
+    case "base-barba":
+      return "base-barba-cejas";
+    case "base-barba-cejas":
+    case "corte-y-barba":
+    case "barba-y-cejas":
+      // Quitando cejas, volvemos a la variante equivalente sin cejas
+      return "base-barba";
+    default:
+      return service;
+  }
+}
 
 export function BookingForm() {
   const [clientName, setClientName] = useState("");
   const [phone, setPhone] = useState("");
-  const [haircutType, setHaircutType] = useState("");
-  const [includeBeard, setIncludeBeard] = useState(false);
-  const [includeEyebrows, setIncludeEyebrows] = useState(false);
+  const [selectedService, setSelectedService] = useState<ServiceKey>("base");
   const [appointmentDate, setAppointmentDate] = useState(initialDate);
   const [appointmentTime, setAppointmentTime] = useState("");
   const [notes, setNotes] = useState("");
@@ -29,15 +99,17 @@ export function BookingForm() {
     message: string;
   }>({ type: "idle", message: "" });
   const [isSaving, setIsSaving] = useState(false);
+  const [savedBooking, setSavedBooking] = useState<BookingResponse["cita"] | null>(null);
+  const [showSavedBooking, setShowSavedBooking] = useState(false);
 
   const estimate = useMemo(
     () =>
       estimateHaircutPrice({
-        haircutType,
-        includeBeard,
-        includeEyebrows,
+        haircutType: serviceByKey[selectedService].label,
+        includeBeard: selectedService === "base-barba" || selectedService === "base-barba-cejas",
+        includeEyebrows: selectedService === "base-cejas" || selectedService === "base-barba-cejas",
       }),
-    [haircutType, includeBeard, includeEyebrows],
+    [selectedService],
   );
 
   const refreshAvailability = useCallback(async () => {
@@ -78,16 +150,16 @@ export function BookingForm() {
         body: JSON.stringify({
           nombreCliente: clientName,
           telefono: phone,
-          tipoCorte: haircutType,
-          incluyeBarba: includeBeard,
-          incluyeCejas: includeEyebrows,
+          tipoCorte: serviceByKey[selectedService].label,
+          incluyeBarba: selectedService === "base-barba" || selectedService === "base-barba-cejas",
+          incluyeCejas: selectedService === "base-cejas" || selectedService === "base-barba-cejas",
           fechaCita: appointmentDate,
           horaCita: appointmentTime,
           notas: notes,
         }),
       });
 
-      const result = await readJsonResponse<{ message?: string }>(response);
+      const result = await readJsonResponse<BookingResponse & { message?: string }>(response);
 
       if (!response.ok) {
         throw new Error(result.message ?? "No se pudo crear la reserva");
@@ -97,6 +169,9 @@ export function BookingForm() {
         type: "success",
         message: "Reserva creada correctamente. Tu cita quedó guardada.",
       });
+      setSavedBooking(result.cita);
+      setShowSavedBooking(true);
+      setSelectedService("base");
       setAppointmentTime("");
       setNotes("");
       await refreshAvailability();
@@ -115,6 +190,10 @@ export function BookingForm() {
       <div className="space-y-2">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">Reserva tu cita</p>
         <h2 className="text-3xl text-[var(--foreground)]">Agenda en pocos pasos</h2>
+        <p className="flex items-center gap-2 text-sm text-[var(--muted)]">
+          <MapPin className="h-4 w-4 text-[var(--accent)]" />
+          Barbería Stiven, Conquistadores, El Peñol, Antioquia
+        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -139,50 +218,71 @@ export function BookingForm() {
         </Field>
       </div>
 
-      <Field label="Tipo de corte">
-        <input
-          required
-          value={haircutType}
-          onChange={(event) => setHaircutType(event.target.value)}
-          className="input"
-          placeholder="Ej. fade con diseño, clásico, degradado..."
-        />
-      </Field>
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 text-sm font-semibold text-[var(--foreground)]">
+          <Scissors className="h-4 w-4 text-[var(--accent)]" />
+          Escoge tu servicio
+        </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          {haircutPackages.map((option) => {
+            const active = selectedService === option.key;
+            return (
+              <button
+                key={option.key}
+                type="button"
+                onClick={() => setSelectedService(option.key)}
+                className={`rounded-3xl border p-4 text-left transition ${
+                  active
+                    ? "border-[var(--accent)] bg-[var(--accent-soft)] shadow-sm"
+                    : "border-[var(--border)] bg-white/80 hover:border-[var(--accent)] hover:bg-white"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--foreground)]">{option.label}</p>
+                    <p className="mt-1 text-xs text-[var(--muted)]">Estilo predefinido para una reserva rápida</p>
+                  </div>
+                  <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[var(--accent)] shadow-sm">
+                    ${option.price.toLocaleString("es-CO")}
+                  </span>
+                </div>
+                {active ? <p className="mt-3 text-xs font-medium text-[var(--accent)]">Seleccionado</p> : null}
+              </button>
+            );
+          })}
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <label className="option-card">
-          <input
-            type="checkbox"
-            checked={includeBeard}
-            onChange={(event) => setIncludeBeard(event.target.checked)}
-          />
-          <span>
-            <strong className="flex items-center justify-between gap-3">
-              <span>Barba</span>
-              <span className="rounded-full bg-[var(--accent-soft)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
-                +${beardAddOnPrice.toLocaleString("es-CO")}
-              </span>
-            </strong>
-            <small>Agrega el servicio de barba al total</small>
-          </span>
-        </label>
+        <div className="grid gap-3 md:grid-cols-2">
+          <button type="button" onClick={() => setSelectedService(toggleBeard(selectedService))} className="option-card text-left">
+            <span className="mt-1 inline-flex rounded-2xl bg-[var(--accent-soft)] p-2 text-[var(--accent)]">
+              <Plus className="h-4 w-4" />
+            </span>
+            <span>
+              <strong className="flex items-center justify-between gap-3">
+                <span>Adicional de barba</span>
+                <span className="rounded-full bg-[var(--accent-soft)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
+                  +${beardAddOnPrice.toLocaleString("es-CO")}
+                </span>
+              </strong>
+              <small>Activa o quita barba dentro del estilo seleccionado</small>
+            </span>
+          </button>
 
-        <label className="option-card">
-          <input
-            type="checkbox"
-            checked={includeEyebrows}
-            onChange={(event) => setIncludeEyebrows(event.target.checked)}
-          />
-          <span>
-            <strong className="flex items-center justify-between gap-3">
-              <span>Cejas</span>
-              <span className="rounded-full bg-[var(--accent-soft)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
-                +${eyebrowsAddOnPrice.toLocaleString("es-CO")}
-              </span>
-            </strong>
-            <small>Incluye perfilado de cejas</small>
-          </span>
-        </label>
+          <button type="button" onClick={() => setSelectedService(toggleEyebrows(selectedService))} className="option-card text-left">
+            <span className="mt-1 inline-flex rounded-2xl bg-[var(--accent-soft)] p-2 text-[var(--accent)]">
+              <Sparkles className="h-4 w-4" />
+            </span>
+            <span>
+              <strong className="flex items-center justify-between gap-3">
+                <span>Adicional de cejas</span>
+                <span className="rounded-full bg-[var(--accent-soft)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
+                  +${eyebrowsAddOnPrice.toLocaleString("es-CO")}
+                </span>
+              </strong>
+              <small>Agrega o quita cejas en un toque</small>
+            </span>
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -257,6 +357,36 @@ export function BookingForm() {
         {isSaving ? <LoaderCircle className="h-5 w-5 animate-spin" /> : null}
         Confirmar cita
       </button>
+
+      {savedBooking ? (
+        <div className="rounded-[2rem] border border-[var(--border)] bg-white/85 p-5 shadow-sm">
+          <button
+            type="button"
+            onClick={() => setShowSavedBooking((current) => !current)}
+            className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)]"
+          >
+            <Eye className="h-4 w-4" />
+            Ver mi cita agendada
+          </button>
+
+          {showSavedBooking ? (
+            <div className="mt-4 space-y-3 rounded-3xl bg-[var(--accent-soft)] p-4">
+              <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-[var(--accent)]">
+                <CheckCircle2 className="h-4 w-4" />
+                Cita guardada correctamente
+              </div>
+              <p className="text-sm text-[var(--foreground)]">
+                {savedBooking.nombreCliente} - {savedBooking.fechaCita} a las {savedBooking.horaCita}
+              </p>
+              <p className="text-sm text-[var(--foreground)]">Servicio: {savedBooking.tipoCorte}</p>
+              <p className="text-sm text-[var(--foreground)]">
+                Estado: <strong>{savedBooking.estado}</strong>
+              </p>
+              <p className="text-sm text-[var(--foreground)]">Dirección: Conquistadores, El Peñol, Antioquia</p>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     </form>
   );
 }

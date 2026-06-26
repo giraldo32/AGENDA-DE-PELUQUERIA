@@ -14,8 +14,8 @@ const bodyFont = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Agenda Peluquería",
-  description: "Sistema de reservas para peluquería con cálculo de precio y panel admin.",
+  title: "Barbería Stiven",
+  description: "Sistema de reservas para Barbería Stiven con cálculo de precio y panel admin.",
 };
 
 export default function RootLayout({
