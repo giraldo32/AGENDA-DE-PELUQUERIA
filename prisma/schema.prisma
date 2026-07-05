@@ -8,22 +8,21 @@ datasource db {
 }
 
 model Usuario {
-  id                 String   @id @default(cuid()) @map("id")
-  nombreUsuario      String   @map("nombre_usuario")
-  contrasenaHash     String   @map("contrasena_hash")
-  rol                String   @default("ADMIN") @map("rol")
-  fechaCreacion      DateTime @default(now()) @map("fecha_creacion")
-  fechaActualizacion DateTime @default(now()) @updatedAt @map("fecha_actualizacion")
+  id             String   @id @default(cuid())
+  nombreUsuario  String   @unique
+  contrasenaHash String
+  rol            String
 
   @@map("usuarios")
 }
 
 model Cliente {
-  id                 String              @id @default(cuid()) @map("id")
-  nombre             String              @map("nombre")
-  telefono           String              @unique @map("telefono")
-  fechaCreacion      DateTime            @default(now()) @map("fecha_creacion")
-  fechaActualizacion DateTime            @default(now()) @updatedAt @map("fecha_actualizacion")
+  id                 String               @id @default(cuid()) @map("id")
+  nombre             String               @map("nombre")
+  telefono           String               @unique @map("telefono")
+  fechaCreacion      DateTime             @default(now()) @map("fecha_creacion")
+  fechaActualizacion DateTime             @updatedAt @map("fecha_actualizacion")
+
   citas              Cita[]
   historialServicios HistorialServicio[]
 
@@ -46,8 +45,9 @@ model Cita {
   precioEstimado     Int      @map("precio_estimado")
   estado             String   @default("PENDIENTE") @map("estado")
   fechaCreacion      DateTime @default(now()) @map("fecha_creacion")
-  fechaActualizacion DateTime @default(now()) @updatedAt @map("fecha_actualizacion")
-  cliente            Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  fechaActualizacion DateTime @updatedAt @map("fecha_actualizacion")
+
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
 
   @@index([clienteId])
   @@map("citas")
@@ -66,9 +66,12 @@ model HistorialServicio {
   observaciones     String?  @map("observaciones")
   estado            String   @default("FINALIZADA") @map("estado")
   fechaCreacion     DateTime @default(now()) @map("fecha_creacion")
-  cliente           Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
 
-  @@index([clienteId, fechaServicio])
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  @@index([clienteId])
+  @@index([fechaServicio])
   @@index([nombreCliente])
+
   @@map("historial_servicios")
 }

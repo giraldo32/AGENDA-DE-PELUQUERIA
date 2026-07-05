@@ -3,68 +3,97 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-function getTodayDateString() {
-  const formatter = new Intl.DateTimeFormat("en-CA", {
+function getTodayDateString(): string {
+  return new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Bogota",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  });
-
-  const parts = formatter.formatToParts(new Date());
-  const year = parts.find((part) => part.type === "year")?.value ?? "0000";
-  const month = parts.find((part) => part.type === "month")?.value ?? "01";
-  const day = parts.find((part) => part.type === "day")?.value ?? "01";
-
-  return `${year}-${month}-${day}`;
+  }).format(new Date());
 }
 
-async function main() {
-  const adminUsername = process.env.ADMIN_USERNAME ?? "admin";
-  const adminPassword = process.env.ADMIN_PASSWORD ?? "admin";
-  const passwordHash = await bcrypt.hash(adminPassword, 10);
+async function createAdmin() {
+  const username = process.env.ADMIN_USERNAME || "admin";
+  const password = process.env.ADMIN_PASSWORD || "admin123";
 
-  await prisma.usuario.upsert({
-    where: { nombreUsuario: adminUsername },
-    update: { contrasenaHash: passwordHash, rol: "ADMIN" },
-    create: {
-      nombreUsuario: adminUsername,
-      contrasenaHash: passwordHash,
-      rol: "ADMIN",
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  const existingUser = await prisma.usuario.findUnique({
+    where: {
+      nombreUsuario: username,
     },
   });
 
-  const existingBookings = await prisma.cita.count();
-  if (existingBookings === 0) {
-    const client = await prisma.cliente.upsert({
-      where: { telefono: "3000000000" },
-      update: { nombre: "Cliente de ejemplo" },
-      create: {
-        nombre: "Cliente de ejemplo",
-        telefono: "3000000000",
+  if (existingUser) {
+    await prisma.usuario.update({
+      where: {
+        nombreUsuario: username,
+      },
+      data: {
+        contrasenaHash: passwordHash,
+        rol: "ADMIN",
       },
     });
 
-    await prisma.cita.create({
+    console.log("Administrador actualizado.");
+  } else {
+    await prisma.usuario.create({
       data: {
-        clienteId: client.id,
-        nombreCliente: "Cliente de ejemplo",
-        telefono: "3000000000",
-        tipoCorte: "fade clásico",
-        incluyeBarba: true,
-        incluyeCejas: false,
-        profesional: "Barbero principal",
-        fechaCita: getTodayDateString(),
-        horaCita: "10:00",
-        notas: "Reserva inicial creada por el seed",
-        precioEstimado: 23000,
-        estado: "CONFIRMADA",
+        nombreUsuario: username,
+        contrasenaHash: passwordHash,
+        rol: "ADMIN",
       },
     });
+
+    console.log("Administrador creado.");
   }
 }
 
+async function createExampleData() {
+  const citas = await prisma.cita.count();
+
+  if (citas > 0) return;
+
+  const cliente = await prisma.cliente.upsert({
+    where: {
+      telefono: "3000000000",
+    },
+    update: {},
+    create: {
+      nombre: "Cliente de ejemplo",
+      telefono: "3000000000",
+    },
+  });
+
+  await prisma.cita.create({
+    data: {
+      clienteId: cliente.id,
+      nombreCliente: cliente.nombre,
+      telefono: cliente.telefono,
+      tipoCorte: "Fade clásico",
+      incluyeBarba: true,
+      incluyeCejas: false,
+      profesional: "Barbero principal",
+      fechaCita: getTodayDateString(),
+      horaCita: "10:00",
+      notas: "Reserva creada automáticamente",
+      precioEstimado: 23000,
+      estado: "CONFIRMADA",
+    },
+  });
+
+  console.log("Datos de ejemplo creados.");
+}
+
+async function main() {
+  await createAdmin();
+  await createExampleData();
+}
+
 main()
+  .then(() => {
+    console.log("Seed ejecutado correctamente.");
+  })
   .catch((error) => {
     console.error(error);
     process.exit(1);
