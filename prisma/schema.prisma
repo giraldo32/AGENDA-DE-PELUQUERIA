@@ -8,10 +8,12 @@ datasource db {
 }
 
 model Usuario {
-  id             String   @id @default(cuid())
-  nombreUsuario  String   @unique
-  contrasenaHash String
-  rol            String
+  id                 String   @id @default(cuid()) @map("id")
+  nombreUsuario      String   @unique @map("nombre_usuario")
+  contrasenaHash     String   @map("contrasena_hash")
+  rol                String   @map("rol")
+  fechaCreacion      DateTime @default(now()) @map("fecha_creacion")
+  fechaActualizacion DateTime @updatedAt @map("fecha_actualizacion")
 
   @@map("usuarios")
 }
