@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { availableTimeSlots } from "@/lib/pricing";
 import { isValidDateString } from "@/lib/time";
+import { archiveExpiredBookings } from "@/lib/agenda";
 
 export async function GET(request: Request) {
   try {
@@ -11,6 +12,8 @@ export async function GET(request: Request) {
     if (!isValidDateString(date)) {
       return NextResponse.json({ message: "Fecha inválida" }, { status: 400 });
     }
+
+    await archiveExpiredBookings();
 
     const citas = await prisma.cita.findMany({
       where: { fechaCita: date },

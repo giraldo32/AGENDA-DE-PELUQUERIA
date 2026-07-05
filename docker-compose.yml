@@ -4,7 +4,7 @@ services:
     container_name: agenda-peluqueria-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: admin
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: agenda_peluqueria
     ports:

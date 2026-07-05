@@ -8,32 +8,67 @@ datasource db {
 }
 
 model Usuario {
-  id              String   @id @default(cuid()) @map("id")
-  nombreUsuario   String   @unique @map("nombre_usuario")
-  contrasenaHash  String   @map("contrasena_hash")
-  rol             String   @default("ADMIN") @map("rol")
-  fechaCreacion   DateTime @default(now()) @map("fecha_creacion")
-  fechaActualizacion DateTime @updatedAt @map("fecha_actualizacion")
+  id                 String   @id @default(cuid()) @map("id")
+  nombreUsuario      String   @map("nombre_usuario")
+  contrasenaHash     String   @map("contrasena_hash")
+  rol                String   @default("ADMIN") @map("rol")
+  fechaCreacion      DateTime @default(now()) @map("fecha_creacion")
+  fechaActualizacion DateTime @default(now()) @updatedAt @map("fecha_actualizacion")
 
   @@map("usuarios")
 }
 
+model Cliente {
+  id                 String              @id @default(cuid()) @map("id")
+  nombre             String              @map("nombre")
+  telefono           String              @unique @map("telefono")
+  fechaCreacion      DateTime            @default(now()) @map("fecha_creacion")
+  fechaActualizacion DateTime            @default(now()) @updatedAt @map("fecha_actualizacion")
+  citas              Cita[]
+  historialServicios HistorialServicio[]
+
+  @@index([nombre])
+  @@map("clientes")
+}
+
 model Cita {
   id                 String   @id @default(cuid()) @map("id")
+  clienteId          String   @map("cliente_id")
   nombreCliente      String   @map("nombre_cliente")
   telefono           String   @map("telefono")
   tipoCorte          String   @map("tipo_corte")
   incluyeBarba       Boolean  @default(false) @map("incluye_barba")
   incluyeCejas       Boolean  @default(false) @map("incluye_cejas")
+  profesional        String   @default("Barbero principal") @map("profesional")
   fechaCita          String   @map("fecha_cita")
   horaCita           String   @map("hora_cita")
   notas              String?  @map("notas")
   precioEstimado     Int      @map("precio_estimado")
   estado             String   @default("PENDIENTE") @map("estado")
   fechaCreacion      DateTime @default(now()) @map("fecha_creacion")
-  fechaActualizacion DateTime @updatedAt @map("fecha_actualizacion")
+  fechaActualizacion DateTime @default(now()) @updatedAt @map("fecha_actualizacion")
+  cliente            Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
 
-  @@index([fechaCita, horaCita])
-  @@index([nombreCliente])
+  @@index([clienteId])
   @@map("citas")
+}
+
+model HistorialServicio {
+  id                String   @id @default(cuid()) @map("id")
+  clienteId         String   @map("cliente_id")
+  nombreCliente     String   @map("nombre_cliente")
+  telefono          String   @map("telefono")
+  fechaServicio     String   @map("fecha_servicio")
+  horaServicio      String   @map("hora_servicio")
+  servicioRealizado String   @map("servicio_realizado")
+  profesional       String   @default("Barbero principal") @map("profesional")
+  precioServicio    Int      @map("precio_servicio")
+  observaciones     String?  @map("observaciones")
+  estado            String   @default("FINALIZADA") @map("estado")
+  fechaCreacion     DateTime @default(now()) @map("fecha_creacion")
+  cliente           Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  @@index([clienteId, fechaServicio])
+  @@index([nombreCliente])
+  @@map("historial_servicios")
 }

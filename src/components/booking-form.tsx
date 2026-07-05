@@ -4,6 +4,7 @@ import type { ComponentType, FormEvent, ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CalendarDays, CheckCircle2, Clock3, Eye, LoaderCircle, MapPin, Phone, Plus, Scissors, Sparkles, User } from "lucide-react";
 import { availableTimeSlots, beardAddOnPrice, eyebrowsAddOnPrice, estimateHaircutPrice, haircutPackages } from "@/lib/pricing";
+import { getLocalDateString } from "@/lib/time";
 import { readJsonResponse } from "@/lib/http";
 
 type AvailabilityResponse = {
@@ -33,7 +34,7 @@ const serviceByKey = Object.fromEntries(haircutPackages.map((option) => [option.
   (typeof haircutPackages)[number]
 >;
 
-const initialDate = new Date().toISOString().slice(0, 10);
+const initialDate = getLocalDateString();
 
 function toggleBeard(service: ServiceKey): ServiceKey {
   switch (service) {

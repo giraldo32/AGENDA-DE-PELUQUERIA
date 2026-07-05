@@ -1,6 +1,6 @@
 # Agenda de Peluquería
 
-Aplicación fullstack en Next.js para que los clientes reserven citas en una peluquería con fecha, hora, descripción del corte y precio estimado. Las reservas se guardan en PostgreSQL con Prisma y el panel admin permite revisar la agenda con credenciales iniciales `admin / admin`.
+Aplicación fullstack en Next.js para que los clientes reserven citas en una peluquería con fecha, hora, descripción del corte y precio estimado. Las reservas se guardan en PostgreSQL con Prisma, la agenda diaria se limpia automáticamente al cambiar de día y el panel admin permite gestionar clientes, historial y contraseña.
 
 ## Funcionalidades
 
@@ -8,8 +8,10 @@ Aplicación fullstack en Next.js para que los clientes reserven citas en una pel
 - Tipo de corte escrito por el cliente para estimar el precio.
 - Servicios adicionales para barba y cejas.
 - Disponibilidad por horario para evitar reservas duplicadas.
-- Persistencia en PostgreSQL.
-- Panel administrativo protegido con usuario `admin` y contraseña `admin`.
+- Agenda diaria automática: solo se muestran las citas del día actual.
+- Historial permanente por cliente con sus servicios anteriores.
+- Gestión de clientes con eliminación confirmada.
+- Panel administrativo protegido con usuario `admin` y contraseña inicial `admin`, con cambio de contraseña desde la configuración.
 
 ## Requisitos
 
@@ -49,10 +51,12 @@ npm run prisma:seed
 npm run dev
 ```
 
-## Credenciales admin
+## Credenciales admin iniciales
 
 - Usuario: `admin`
 - Contraseña: `admin`
+
+La contraseña se puede cambiar desde `Configuración → Cambiar contraseña` en el panel admin.
 
 ## Modelo de precio
 

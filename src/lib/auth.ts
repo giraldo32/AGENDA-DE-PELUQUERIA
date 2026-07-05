@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
+import { prisma } from "@/lib/db";
 
 const COOKIE_NAME = "agenda_admin_session";
 const SESSION_DURATION_MS = 1000 * 60 * 60 * 8;
@@ -51,14 +52,45 @@ export function verifySessionToken(token: string | undefined | null) {
 }
 
 export async function authenticateAdmin(usuario: string, contrasena: string) {
-  const adminUsername = process.env.ADMIN_USERNAME ?? "admin";
-  const adminPassword = process.env.ADMIN_PASSWORD ?? "admin";
+  const admin = await prisma.usuario.findUnique({
+    where: { nombreUsuario: usuario },
+    select: { contrasenaHash: true },
+  });
 
-  if (usuario !== adminUsername || contrasena !== adminPassword) {
+  if (!admin) {
+    return null;
+  }
+
+  const isValid = await bcrypt.compare(contrasena, admin.contrasenaHash);
+  if (!isValid) {
     return null;
   }
 
   return encodeSession(usuario);
+}
+
+export async function changeAdminPassword(usuario: string, currentPassword: string, newPassword: string) {
+  const admin = await prisma.usuario.findUnique({
+    where: { nombreUsuario: usuario },
+    select: { id: true, contrasenaHash: true },
+  });
+
+  if (!admin) {
+    return { success: false as const, message: "No se encontró el usuario administrador." };
+  }
+
+  const matchesCurrentPassword = await bcrypt.compare(currentPassword, admin.contrasenaHash);
+  if (!matchesCurrentPassword) {
+    return { success: false as const, message: "La contraseña actual no coincide." };
+  }
+
+  const newPasswordHash = await bcrypt.hash(newPassword, 10);
+  await prisma.usuario.update({
+    where: { id: admin.id },
+    data: { contrasenaHash: newPasswordHash },
+  });
+
+  return { success: true as const };
 }
 
 export async function setAdminCookie(token: string) {

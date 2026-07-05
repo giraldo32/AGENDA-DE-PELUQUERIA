@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { archiveExpiredBookings, getTodayDateString } from "@/lib/agenda";
 
 export async function GET() {
   try {
+    await archiveExpiredBookings();
+    const today = getTodayDateString();
+
     const citas = await prisma.cita.findMany({
-      orderBy: [{ fechaCita: "asc" }, { horaCita: "asc" }],
+      where: { fechaCita: today },
+      orderBy: [{ horaCita: "asc" }],
       select: {
         id: true,
         nombreCliente: true,
@@ -12,6 +17,7 @@ export async function GET() {
         tipoCorte: true,
         incluyeBarba: true,
         incluyeCejas: true,
+        profesional: true,
         fechaCita: true,
         horaCita: true,
         notas: true,

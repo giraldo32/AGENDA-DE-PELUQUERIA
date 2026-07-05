@@ -4,9 +4,12 @@ import { estimateHaircutPrice } from "@/lib/pricing";
 import { citaSchema } from "@/lib/validation";
 import { isValidDateString, isValidTimeSlot } from "@/lib/time";
 import { getAdminSessionFromCookies } from "@/lib/auth";
+import { archiveExpiredBookings, getTodayDateString, upsertClientFromBooking } from "@/lib/agenda";
 
 export async function POST(request: Request) {
   try {
+    await archiveExpiredBookings();
+
     const body = await request.json();
     const parsed = citaSchema.safeParse(body);
 
@@ -37,13 +40,20 @@ export async function POST(request: Request) {
       includeEyebrows: data.incluyeCejas,
     });
 
+    const client = await upsertClientFromBooking({
+      nombreCliente: data.nombreCliente,
+      telefono: data.telefono,
+    });
+
     const cita = await prisma.cita.create({
       data: {
+        clienteId: client.id,
         nombreCliente: data.nombreCliente,
         telefono: data.telefono,
         tipoCorte: data.tipoCorte,
         incluyeBarba: data.incluyeBarba,
         incluyeCejas: data.incluyeCejas,
+        profesional: "Barbero principal",
         fechaCita: data.fechaCita,
         horaCita: data.horaCita,
         notas: data.notas?.trim() ? data.notas : null,
@@ -66,8 +76,12 @@ export async function GET() {
       return NextResponse.json({ message: "No autorizado" }, { status: 401 });
     }
 
+    await archiveExpiredBookings();
+    const today = getTodayDateString();
+
     const citas = await prisma.cita.findMany({
-      orderBy: [{ fechaCita: "asc" }, { horaCita: "asc" }],
+      where: { fechaCita: today },
+      orderBy: [{ horaCita: "asc" }],
     });
 
     return NextResponse.json({ citas });

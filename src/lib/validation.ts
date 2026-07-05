@@ -15,3 +15,14 @@ export const loginSchema = z.object({
   usuario: z.string().min(1),
   contrasena: z.string().min(1),
 });
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Ingresa tu contraseña actual"),
+    newPassword: z.string().min(8, "La nueva contraseña debe tener al menos 8 caracteres"),
+    confirmNewPassword: z.string().min(1, "Confirma la nueva contraseña"),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: "Las contraseñas nuevas no coinciden",
+    path: ["confirmNewPassword"],
+  });
