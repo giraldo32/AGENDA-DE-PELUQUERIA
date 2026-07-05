@@ -123,4 +123,4 @@ export async function getAdminSessionFromCookies() {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
   return verifySessionToken(token);
-}
+}//coreegido
