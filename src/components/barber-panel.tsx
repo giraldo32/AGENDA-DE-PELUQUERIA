@@ -47,10 +47,10 @@ export function BarberPanel() {
 
   return (
     <Shell>
-      <div className="mx-auto w-full max-w-6xl space-y-6 rounded-[2rem] border border-[var(--border)] bg-white/80 p-6 shadow-glow backdrop-blur">
+      <div className="app-card mx-auto w-full max-w-6xl space-y-6 p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <div className="mb-3 inline-flex rounded-2xl bg-[var(--accent-soft)] p-3 text-[var(--accent)]">
+            <div className="mb-3 inline-flex rounded-lg bg-[var(--accent-soft)] p-3 text-[var(--accent)]">
               <Scissors className="h-6 w-6" />
             </div>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">Panel barbero</p>
@@ -65,7 +65,7 @@ export function BarberPanel() {
           </div>
           <button
             onClick={loadCitas}
-            className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm font-semibold"
+            className="btn btn-secondary"
           >
             <RefreshCcw className="h-4 w-4" />
             Actualizar
@@ -86,9 +86,9 @@ export function BarberPanel() {
 
         {message ? <p className="text-sm text-rose-700">{message}</p> : null}
 
-        <div className="overflow-hidden rounded-[1.75rem] border border-[var(--border)] bg-white">
+        <div className="table-shell">
           <table className="min-w-full divide-y divide-[var(--border)] text-left text-sm">
-            <thead className="bg-[#f5f0e6] text-[var(--foreground)]">
+            <thead className="table-head">
               <tr>
                 <th className="px-4 py-3">Cliente</th>
                 <th className="px-4 py-3">Hora</th>
@@ -134,7 +134,7 @@ function Shell({ children }: { children: ReactNode }) {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[1.75rem] border border-[var(--border)] bg-white px-5 py-4 shadow-sm">
+    <div className="stat-card">
       <p className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">{label}</p>
       <p className="mt-2 text-2xl font-semibold text-[var(--foreground)]">{value}</p>
     </div>

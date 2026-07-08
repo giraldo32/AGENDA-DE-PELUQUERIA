@@ -17,6 +17,7 @@ export async function GET() {
       id: true,
       nombre: true,
       telefono: true,
+      correo: true,
       fechaCreacion: true,
       fechaActualizacion: true,
       _count: {

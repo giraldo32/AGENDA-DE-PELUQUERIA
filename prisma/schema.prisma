@@ -22,6 +22,7 @@ model Cliente {
   id                 String               @id @default(cuid()) @map("id")
   nombre             String               @map("nombre")
   telefono           String               @unique @map("telefono")
+  correo             String?              @map("correo")
   fechaCreacion      DateTime             @default(now()) @map("fecha_creacion")
   fechaActualizacion DateTime             @updatedAt @map("fecha_actualizacion")
 
@@ -37,6 +38,7 @@ model Cita {
   clienteId          String   @map("cliente_id")
   nombreCliente      String   @map("nombre_cliente")
   telefono           String   @map("telefono")
+  correo             String?  @map("correo")
   tipoCorte          String   @map("tipo_corte")
   incluyeBarba       Boolean  @default(false) @map("incluye_barba")
   incluyeCejas       Boolean  @default(false) @map("incluye_cejas")
@@ -60,6 +62,7 @@ model HistorialServicio {
   clienteId         String   @map("cliente_id")
   nombreCliente     String   @map("nombre_cliente")
   telefono          String   @map("telefono")
+  correo            String?  @map("correo")
   fechaServicio     String   @map("fecha_servicio")
   horaServicio      String   @map("hora_servicio")
   servicioRealizado String   @map("servicio_realizado")

@@ -2,7 +2,7 @@
 
 import type { ComponentType, FormEvent, ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarDays, CheckCircle2, Clock3, Eye, LoaderCircle, MapPin, Phone, Plus, Scissors, Sparkles, User } from "lucide-react";
+import { CalendarDays, CheckCircle2, Clock3, Eye, LoaderCircle, Mail, MapPin, Phone, Plus, Scissors, Sparkles, User } from "lucide-react";
 import { availableTimeSlots, beardAddOnPrice, eyebrowsAddOnPrice, estimateHaircutPrice, haircutPackages } from "@/lib/pricing";
 import { getLocalDateString } from "@/lib/time";
 import { readJsonResponse } from "@/lib/http";
@@ -16,6 +16,7 @@ type BookingResponse = {
     id: string;
     nombreCliente: string;
     telefono: string;
+    correo?: string | null;
     tipoCorte: string;
     incluyeBarba: boolean;
     incluyeCejas: boolean;
@@ -89,6 +90,7 @@ function toggleEyebrows(service: ServiceKey): ServiceKey {
 export function BookingForm() {
   const [clientName, setClientName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [selectedService, setSelectedService] = useState<ServiceKey>("base");
   const [appointmentDate, setAppointmentDate] = useState(initialDate);
   const [appointmentTime, setAppointmentTime] = useState("");
@@ -151,6 +153,7 @@ export function BookingForm() {
         body: JSON.stringify({
           nombreCliente: clientName,
           telefono: phone,
+          correo: email,
           tipoCorte: serviceByKey[selectedService].label,
           incluyeBarba: selectedService === "base-barba" || selectedService === "base-barba-cejas",
           incluyeCejas: selectedService === "base-cejas" || selectedService === "base-barba-cejas",
@@ -174,6 +177,7 @@ export function BookingForm() {
       setShowSavedBooking(true);
       setSelectedService("base");
       setAppointmentTime("");
+      setEmail("");
       setNotes("");
       await refreshAvailability();
     } catch (error) {
@@ -197,7 +201,7 @@ export function BookingForm() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-3">
         <Field label="Nombre completo" icon={User}>
           <input
             required
@@ -217,6 +221,16 @@ export function BookingForm() {
             placeholder="3001234567"
           />
         </Field>
+
+        <Field label="Correo opcional" icon={Mail}>
+          <input
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            className="input"
+            placeholder="cliente@correo.com"
+          />
+        </Field>
       </div>
 
       <div className="space-y-3">
@@ -232,10 +246,10 @@ export function BookingForm() {
                 key={option.key}
                 type="button"
                 onClick={() => setSelectedService(option.key)}
-                className={`rounded-3xl border p-4 text-left transition ${
+                className={`rounded-xl border p-4 text-left transition ${
                   active
-                    ? "border-[var(--accent)] bg-[var(--accent-soft)] shadow-sm"
-                    : "border-[var(--border)] bg-white/80 hover:border-[var(--accent)] hover:bg-white"
+                    ? "border-[var(--accent)] bg-[var(--accent-soft)] shadow-sm ring-2 ring-[var(--accent-soft-strong)]"
+                    : "border-[var(--border)] bg-white hover:border-[var(--accent)] hover:bg-[var(--accent-soft)]"
                 }`}
               >
                 <div className="flex items-center justify-between gap-3">
@@ -243,7 +257,7 @@ export function BookingForm() {
                     <p className="text-sm font-semibold text-[var(--foreground)]">{option.label}</p>
                     <p className="mt-1 text-xs text-[var(--muted)]">Estilo predefinido para una reserva rápida</p>
                   </div>
-                  <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[var(--accent)] shadow-sm">
+                  <span className="badge-soft bg-white">
                     ${option.price.toLocaleString("es-CO")}
                   </span>
                 </div>
@@ -255,13 +269,13 @@ export function BookingForm() {
 
         <div className="grid gap-3 md:grid-cols-2">
           <button type="button" onClick={() => setSelectedService(toggleBeard(selectedService))} className="option-card text-left">
-            <span className="mt-1 inline-flex rounded-2xl bg-[var(--accent-soft)] p-2 text-[var(--accent)]">
+            <span className="mt-1 inline-flex rounded-lg bg-[var(--accent-soft)] p-2 text-[var(--accent)]">
               <Plus className="h-4 w-4" />
             </span>
             <span>
               <strong className="flex items-center justify-between gap-3">
                 <span>Adicional de barba</span>
-                <span className="rounded-full bg-[var(--accent-soft)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
+                <span className="badge-soft">
                   +${beardAddOnPrice.toLocaleString("es-CO")}
                 </span>
               </strong>
@@ -270,13 +284,13 @@ export function BookingForm() {
           </button>
 
           <button type="button" onClick={() => setSelectedService(toggleEyebrows(selectedService))} className="option-card text-left">
-            <span className="mt-1 inline-flex rounded-2xl bg-[var(--accent-soft)] p-2 text-[var(--accent)]">
+            <span className="mt-1 inline-flex rounded-lg bg-[var(--accent-soft)] p-2 text-[var(--accent)]">
               <Sparkles className="h-4 w-4" />
             </span>
             <span>
               <strong className="flex items-center justify-between gap-3">
                 <span>Adicional de cejas</span>
-                <span className="rounded-full bg-[var(--accent-soft)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">
+                <span className="badge-soft">
                   +${eyebrowsAddOnPrice.toLocaleString("es-CO")}
                 </span>
               </strong>
@@ -323,13 +337,13 @@ export function BookingForm() {
         />
       </Field>
 
-      <div className="rounded-3xl border border-[var(--border)] bg-[#102018] p-5 text-white shadow-lg">
+      <div className="rounded-xl border border-blue-900/20 bg-[var(--ink)] p-5 text-white shadow-lg shadow-blue-950/20">
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-sm uppercase tracking-[0.18em] text-white/60">Valor estimado</p>
             <p className="mt-2 text-4xl font-semibold">${estimate.estimatedPrice.toLocaleString("es-CO")}</p>
           </div>
-          <div className="rounded-2xl bg-white/10 px-4 py-3 text-sm text-white/80">
+          <div className="rounded-lg bg-white/10 px-4 py-3 text-sm text-white/80">
             {loadingAvailability ? "Consultando horarios..." : `${availableTimeSlots.length - bookedTimes.length} horarios libres`}
           </div>
         </div>
@@ -340,7 +354,7 @@ export function BookingForm() {
 
       {submissionState.type !== "idle" && (
         <div
-          className={`rounded-2xl border px-4 py-3 text-sm ${
+          className={`rounded-lg border px-4 py-3 text-sm ${
             submissionState.type === "success"
               ? "border-emerald-200 bg-emerald-50 text-emerald-900"
               : "border-rose-200 bg-rose-50 text-rose-900"
@@ -353,25 +367,25 @@ export function BookingForm() {
       <button
         type="submit"
         disabled={isSaving}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--accent)] px-5 py-4 text-base font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        className="btn btn-primary w-full py-4 text-base"
       >
         {isSaving ? <LoaderCircle className="h-5 w-5 animate-spin" /> : null}
         Confirmar cita
       </button>
 
       {savedBooking ? (
-        <div className="rounded-[2rem] border border-[var(--border)] bg-white/85 p-5 shadow-sm">
+        <div className="section-card">
           <button
             type="button"
             onClick={() => setShowSavedBooking((current) => !current)}
-            className="inline-flex items-center gap-2 rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:border-[var(--accent)]"
+            className="btn btn-secondary"
           >
             <Eye className="h-4 w-4" />
             Ver mi cita agendada
           </button>
 
           {showSavedBooking ? (
-            <div className="mt-4 space-y-3 rounded-3xl bg-[var(--accent-soft)] p-4">
+            <div className="mt-4 space-y-3 rounded-xl bg-[var(--accent-soft)] p-4">
               <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-[var(--accent)]">
                 <CheckCircle2 className="h-4 w-4" />
                 Cita guardada correctamente

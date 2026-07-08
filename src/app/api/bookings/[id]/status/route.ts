@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAdminSessionFromCookies } from "@/lib/auth";
+import { sendBookingConfirmation } from "@/lib/notifications";
 
 const allowedStatuses = new Set(["PENDIENTE", "CONFIRMADA", "CANCELADA"]);
 
@@ -24,6 +25,24 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       where: { id },
       data: { estado },
     });
+
+    // Enviar notificaciones solo al confirmar
+    if (estado === "CONFIRMADA") {
+      try {
+        await sendBookingConfirmation({
+          nombreCliente: cita.nombreCliente,
+          telefono: cita.telefono,
+          correo: cita.correo ?? null,
+          tipoCorte: cita.tipoCorte,
+          fechaCita: cita.fechaCita,
+          horaCita: cita.horaCita,
+          precioEstimado: cita.precioEstimado,
+          notas: cita.notas,
+        });
+      } catch (notifError) {
+        console.error("Error enviando notificaciones (no bloqueante):", notifError);
+      }
+    }
 
     return NextResponse.json({ cita });
   } catch (error) {

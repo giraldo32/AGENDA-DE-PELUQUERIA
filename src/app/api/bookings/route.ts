@@ -5,6 +5,7 @@ import { citaSchema } from "@/lib/validation";
 import { isValidDateString, isValidTimeSlot } from "@/lib/time";
 import { getAdminSessionFromCookies } from "@/lib/auth";
 import { archiveExpiredBookings, getTodayDateString, upsertClientFromBooking } from "@/lib/agenda";
+import { sendBookingConfirmation } from "@/lib/notifications";
 
 export async function POST(request: Request) {
   try {
@@ -43,6 +44,7 @@ export async function POST(request: Request) {
     const client = await upsertClientFromBooking({
       nombreCliente: data.nombreCliente,
       telefono: data.telefono,
+      correo: data.correo,
     });
 
     const cita = await prisma.cita.create({
@@ -50,6 +52,7 @@ export async function POST(request: Request) {
         clienteId: client.id,
         nombreCliente: data.nombreCliente,
         telefono: data.telefono,
+        correo: data.correo ?? null,
         tipoCorte: data.tipoCorte,
         incluyeBarba: data.incluyeBarba,
         incluyeCejas: data.incluyeCejas,
@@ -61,10 +64,27 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({ cita, estimate }, { status: 201 });
+    let notifications: Awaited<ReturnType<typeof sendBookingConfirmation>> = [];
+    try {
+      notifications = await sendBookingConfirmation({
+        nombreCliente: cita.nombreCliente,
+        telefono: cita.telefono,
+        correo: data.correo ?? null,
+        tipoCorte: cita.tipoCorte,
+        fechaCita: cita.fechaCita,
+        horaCita: cita.horaCita,
+        precioEstimado: cita.precioEstimado,
+        notas: cita.notas,
+      });
+    } catch (notifError) {
+      console.error("Error en notificaciones (no bloqueante):", notifError);
+    }
+
+    return NextResponse.json({ cita, estimate, notifications }, { status: 201 });
   } catch (error) {
-    console.error("Error en POST /api/bookings", error);
-    return NextResponse.json({ message: "No se pudo crear la reserva" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Error desconocido";
+    console.error("Error en POST /api/bookings:", errorMessage, error);
+    return NextResponse.json({ message: errorMessage }, { status: 500 });
   }
 }
 

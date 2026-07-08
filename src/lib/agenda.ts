@@ -19,7 +19,10 @@ export function getTodayDateString() {
   return `${year}-${month}-${day}`;
 }
 
-async function ensureClientForBooking(transaction: Prisma.TransactionClient, booking: { clienteId: string | null; nombreCliente: string; telefono: string }) {
+async function ensureClientForBooking(
+  transaction: Prisma.TransactionClient,
+  booking: { clienteId: string | null; nombreCliente: string; telefono: string; correo?: string | null },
+) {
   if (booking.clienteId) {
     const existingClient = await transaction.cliente.findUnique({
       where: { id: booking.clienteId },
@@ -32,10 +35,11 @@ async function ensureClientForBooking(transaction: Prisma.TransactionClient, boo
 
   return transaction.cliente.upsert({
     where: { telefono: booking.telefono },
-    update: { nombre: booking.nombreCliente },
+    update: { nombre: booking.nombreCliente, correo: booking.correo?.trim() || undefined },
     create: {
       nombre: booking.nombreCliente,
       telefono: booking.telefono,
+      correo: booking.correo?.trim() || null,
     },
   });
 }
@@ -63,6 +67,7 @@ export async function archiveExpiredBookings() {
           clienteId: client.id,
           nombreCliente: booking.nombreCliente,
           telefono: booking.telefono,
+          correo: booking.correo,
           fechaServicio: booking.fechaCita,
           horaServicio: booking.horaCita,
           servicioRealizado: booking.tipoCorte,
@@ -86,13 +91,14 @@ export async function archiveExpiredBookings() {
   return { archived: expiredBookings.length };
 }
 
-export async function upsertClientFromBooking(data: { nombreCliente: string; telefono: string }) {
+export async function upsertClientFromBooking(data: { nombreCliente: string; telefono: string; correo?: string }) {
   return prisma.cliente.upsert({
     where: { telefono: data.telefono },
-    update: { nombre: data.nombreCliente },
+    update: { nombre: data.nombreCliente, correo: data.correo?.trim() || undefined },
     create: {
       nombre: data.nombreCliente,
       telefono: data.telefono,
+      correo: data.correo?.trim() || null,
     },
   });
 }

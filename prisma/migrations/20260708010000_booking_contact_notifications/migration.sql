@@ -1,0 +1,4 @@
+ALTER TABLE "clientes" ADD COLUMN IF NOT EXISTS "correo" TEXT;
+ALTER TABLE "citas" ADD COLUMN IF NOT EXISTS "correo" TEXT;
+ALTER TABLE "historial_servicios" ADD COLUMN IF NOT EXISTS "correo" TEXT;
+

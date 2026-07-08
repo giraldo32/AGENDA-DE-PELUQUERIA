@@ -1,5 +1,5 @@
 import { BookingForm } from "@/components/booking-form";
-import { MapPin, Scissors, ShieldCheck, Sparkles } from "lucide-react";
+import { CalendarCheck, MapPin, Scissors, ShieldCheck, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 const highlights = [
@@ -23,49 +23,41 @@ const highlights = [
 export default function HomePage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-6 sm:px-6 lg:px-8">
-      <section className="grid flex-1 gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-        <div className="space-y-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/70 px-4 py-2 text-sm font-medium text-[var(--accent)] shadow-sm backdrop-blur">
-            <span className="h-2 w-2 rounded-full bg-[#d97706]" />
-            Barbería Stiven - agenda digital con precios automáticos
-          </div>
-
-          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/80 px-4 py-2 text-sm font-medium text-[var(--foreground)] shadow-sm backdrop-blur">
-            <MapPin className="h-4 w-4 text-[var(--accent)]" />
-            Conquistadores, El Peñol, Antioquia
+      <section className="grid flex-1 gap-8 lg:grid-cols-[1fr_0.95fr] lg:items-center">
+        <div className="space-y-7">
+          <div className="flex flex-wrap gap-3">
+            <span className="badge-soft">
+              <CalendarCheck className="mr-2 h-4 w-4" />
+              Agenda digital
+            </span>
+            <span className="badge-soft bg-white text-[var(--foreground)]">
+              <MapPin className="h-4 w-4 text-[var(--accent)]" />
+              Conquistadores, El Peñol, Antioquia
+            </span>
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link
-              href="/barbero"
-              className="inline-flex items-center justify-center rounded-2xl border border-[var(--border)] bg-white px-5 py-3 text-sm font-semibold text-[var(--foreground)] shadow-sm transition hover:border-[var(--accent)]"
-            >
+            <Link href="/barbero" className="btn btn-secondary">
               Ver panel del barbero
             </Link>
-            <Link
-              href="/admin"
-              className="inline-flex items-center justify-center rounded-2xl bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
-            >
+            <Link href="/admin" className="btn btn-primary">
               Ver panel admin
             </Link>
           </div>
 
           <div className="space-y-5">
-            <h1 className="max-w-2xl text-5xl leading-none text-[var(--foreground)] sm:text-6xl lg:text-7xl">
-              Reserva tu cita en Barbería Stiven con una experiencia clara y rápida.
+            <h1 className="max-w-2xl text-4xl font-semibold leading-tight text-[var(--foreground)] sm:text-5xl lg:text-6xl">
+              Barbería Stiven
             </h1>
             <p className="max-w-2xl text-lg leading-8 text-[var(--muted)] sm:text-xl">
-              El cliente elige el estilo, añade barba o cejas, selecciona la fecha y la hora, y recibe un valor estimado antes de confirmar la cita.
+              Reserva tu cita con una experiencia clara: servicio, fecha, hora y valor estimado antes de confirmar.
             </p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
             {highlights.map(({ title, description, icon: Icon }) => (
-              <article
-                key={title}
-                className="rounded-3xl border border-[var(--border)] bg-white/70 p-5 shadow-sm backdrop-blur"
-              >
-                <div className="mb-4 inline-flex rounded-2xl bg-[var(--accent-soft)] p-3 text-[var(--accent)]">
+              <article key={title} className="section-card">
+                <div className="mb-4 inline-flex rounded-lg bg-[var(--accent-soft)] p-3 text-[var(--accent)]">
                   <Icon className="h-5 w-5" />
                 </div>
                 <h2 className="text-lg font-semibold text-[var(--foreground)]">{title}</h2>
@@ -76,7 +68,7 @@ export default function HomePage() {
         </div>
 
         <div className="lg:pl-6">
-          <div className="rounded-[2rem] border border-white/70 bg-[var(--surface)] p-4 shadow-glow backdrop-blur-xl sm:p-6">
+          <div className="app-card p-4 sm:p-6">
             <BookingForm />
           </div>
         </div>

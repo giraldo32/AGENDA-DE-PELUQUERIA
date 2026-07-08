@@ -1,13 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f4ed;
-  --foreground: #102018;
-  --surface: rgba(255, 255, 255, 0.74);
-  --muted: #6b7280;
-  --border: rgba(16, 32, 24, 0.12);
-  --accent: #1b5e20;
-  --accent-soft: #dfead8;
+  --background: #eef5ff;
+  --foreground: #10233f;
+  --surface: rgba(255, 255, 255, 0.9);
+  --muted: #64748b;
+  --border: rgba(30, 64, 175, 0.14);
+  --accent: #2563eb;
+  --accent-dark: #1e40af;
+  --accent-soft: #dbeafe;
+  --accent-soft-strong: #bfdbfe;
+  --table-head: #eaf2ff;
+  --ink: #0f172a;
 }
 
 * {
@@ -23,19 +27,71 @@ body {
   min-height: 100vh;
   color: var(--foreground);
   background:
-    radial-gradient(circle at top left, rgba(224, 143, 28, 0.18), transparent 36%),
-    radial-gradient(circle at top right, rgba(27, 94, 32, 0.18), transparent 30%),
-    linear-gradient(180deg, #faf7f0 0%, #f4f0e7 100%);
+    linear-gradient(135deg, rgba(37, 99, 235, 0.18), transparent 34%),
+    linear-gradient(225deg, rgba(14, 165, 233, 0.12), transparent 32%),
+    linear-gradient(180deg, #f8fbff 0%, var(--background) 100%);
   font-family: var(--font-body), sans-serif;
 }
 
 @layer components {
   .input {
-    @apply w-full rounded-2xl border border-[var(--border)] bg-white/90 px-4 py-3 text-sm text-[var(--foreground)] outline-none transition placeholder:text-slate-400 focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-soft)];
+    @apply w-full rounded-lg border border-[var(--border)] bg-white px-4 py-3 text-sm text-[var(--foreground)] outline-none transition placeholder:text-slate-400 focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent-soft)];
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-primary {
+    @apply bg-[var(--accent)] text-white hover:bg-[var(--accent-dark)];
+  }
+
+  .btn-secondary {
+    @apply border border-[var(--border)] bg-white text-[var(--foreground)] hover:border-[var(--accent)] hover:bg-[var(--accent-soft)];
+  }
+
+  .btn-dark {
+    @apply bg-[var(--ink)] text-white hover:bg-[var(--accent-dark)];
+  }
+
+  .btn-success {
+    @apply bg-emerald-600 text-white hover:bg-emerald-700;
+  }
+
+  .btn-danger {
+    @apply bg-rose-600 text-white hover:bg-rose-700;
+  }
+
+  .btn-sm {
+    @apply px-3 py-2 text-xs;
+  }
+
+  .app-card {
+    @apply rounded-xl border border-[var(--border)] bg-[var(--surface)] shadow-xl shadow-blue-950/10 backdrop-blur;
+  }
+
+  .section-card {
+    @apply rounded-xl border border-[var(--border)] bg-white p-5 shadow-sm;
+  }
+
+  .stat-card {
+    @apply rounded-xl border border-[var(--border)] bg-white px-5 py-4 shadow-sm;
+  }
+
+  .badge-soft {
+    @apply inline-flex items-center rounded-full bg-[var(--accent-soft)] px-3 py-1 text-xs font-semibold text-[var(--accent-dark)];
+  }
+
+  .table-shell {
+    @apply overflow-hidden rounded-xl border border-[var(--border)] bg-white shadow-sm;
+  }
+
+  .table-head {
+    @apply bg-[var(--table-head)] text-[var(--foreground)];
   }
 
   .option-card {
-    @apply flex cursor-pointer items-start gap-3 rounded-3xl border border-[var(--border)] bg-white/80 p-4 transition hover:border-[var(--accent)] hover:bg-white;
+    @apply flex cursor-pointer items-start gap-3 rounded-xl border border-[var(--border)] bg-white p-4 transition hover:border-[var(--accent)] hover:bg-[var(--accent-soft)];
   }
 
   .option-card input {
@@ -56,10 +112,10 @@ h2,
 h3,
 h4 {
   font-family: var(--font-heading), sans-serif;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
 }
 
 ::selection {
-  background: #1b5e20;
+  background: var(--accent);
   color: white;
 }

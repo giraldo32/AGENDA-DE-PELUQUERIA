@@ -3,6 +3,12 @@ import { z } from "zod";
 export const citaSchema = z.object({
   nombreCliente: z.string().min(2, "Ingresa tu nombre completo"),
   telefono: z.string().min(7, "Ingresa un teléfono válido"),
+  correo: z
+    .string()
+    .trim()
+    .email("Ingresa un correo válido")
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
   tipoCorte: z.string().min(2, "Describe el tipo de corte"),
   incluyeBarba: z.boolean().default(false),
   incluyeCejas: z.boolean().default(false),
