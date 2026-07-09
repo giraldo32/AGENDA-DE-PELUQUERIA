@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
-import { MapPin, RefreshCcw, Scissors } from "lucide-react";
+import { MapPin, RefreshCcw, Scissors, X } from "lucide-react";
 import { readJsonResponse } from "@/lib/http";
 
 type Cita = {
@@ -22,24 +22,71 @@ type Cita = {
 export function BarberPanel() {
   const [citas, setCitas] = useState<Cita[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<"success" | "error">("error");
 
-  const loadCitas = useCallback(async () => {
-    const response = await fetch("/api/barbero/citas");
-    if (!response.ok) {
-      setMessage("No se pudieron cargar las citas.");
-      setLoading(false);
-      return;
+  const loadCitas = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+      setMessage("");
     }
+    try {
+      const response = await fetch("/api/barbero/citas");
+      if (!response.ok) {
+        setMessage("No se pudieron cargar las citas.");
+        setMessageType("error");
+        setLoading(false);
+        return;
+      }
 
-    const data = await readJsonResponse<{ citas: Cita[] }>(response);
-    setCitas(data.citas);
-    setLoading(false);
+      const data = await readJsonResponse<{ citas: Cita[] }>(response);
+      setCitas(data.citas);
+    } catch (error) {
+      console.error("Error al cargar citas:", error);
+      setMessage("Error de conexión al cargar las citas.");
+      setMessageType("error");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, []);
 
   useEffect(() => {
     void loadCitas();
   }, [loadCitas]);
+
+  async function cancelarCita(id: string) {
+    const confirmacion = window.confirm("¿Estás seguro de cancelar esta cita? El cliente será notificado.");
+    if (!confirmacion) return;
+
+    const response = await fetch(`/api/bookings/${id}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ estado: "CANCELADA" }),
+    });
+
+    if (!response.ok) {
+      setMessage("No se pudo cancelar la cita.");
+      setMessageType("error");
+      return;
+    }
+
+    setMessage("Cita cancelada correctamente.");
+    setMessageType("success");
+    await loadCitas();
+  }
+
+  function statusStyle(status: string) {
+    switch (status) {
+      case "CONFIRMADA":
+        return "bg-emerald-100 text-emerald-900";
+      case "CANCELADA":
+        return "bg-rose-100 text-rose-900";
+      default:
+        return "bg-amber-100 text-amber-900";
+    }
+  }
 
   if (loading) {
     return <Shell>Cargando agenda del barbero...</Shell>;
@@ -64,11 +111,12 @@ export function BarberPanel() {
             </p>
           </div>
           <button
-            onClick={loadCitas}
+            onClick={() => void loadCitas(true)}
+            disabled={refreshing}
             className="btn btn-secondary"
           >
-            <RefreshCcw className="h-4 w-4" />
-            Actualizar
+            <RefreshCcw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+            {refreshing ? "Actualizando..." : "Actualizar"}
           </button>
         </div>
 
@@ -84,7 +132,11 @@ export function BarberPanel() {
           />
         </div>
 
-        {message ? <p className="text-sm text-rose-700">{message}</p> : null}
+        {message ? (
+          <p className={`text-sm ${messageType === "success" ? "text-emerald-700" : "text-rose-700"}`}>
+            {message}
+          </p>
+        ) : null}
 
         <div className="table-shell">
           <table className="min-w-full divide-y divide-[var(--border)] text-left text-sm">
@@ -96,6 +148,7 @@ export function BarberPanel() {
                 <th className="px-4 py-3">Notas</th>
                 <th className="px-4 py-3">Precio</th>
                 <th className="px-4 py-3">Estado</th>
+                <th className="px-4 py-3">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border)]">
@@ -117,7 +170,20 @@ export function BarberPanel() {
                   </td>
                   <td className="px-4 py-4">{cita.notas ?? "Sin notas"}</td>
                   <td className="px-4 py-4 font-semibold">${cita.precioEstimado.toLocaleString("es-CO")}</td>
-                  <td className="px-4 py-4">{cita.estado}</td>
+                  <td className="px-4 py-4">
+                    <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusStyle(cita.estado)}`}>
+                      {cita.estado}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4">
+                    <button
+                      onClick={() => void cancelarCita(cita.id)}
+                      className="btn btn-danger btn-sm"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                      Cancelar
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

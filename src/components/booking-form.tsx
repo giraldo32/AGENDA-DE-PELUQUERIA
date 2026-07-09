@@ -41,11 +41,11 @@ function toggleBeard(service: ServiceKey): ServiceKey {
   switch (service) {
     case "corte":
     case "corte-completo":
-      return "solo-barba";
+      return "corte-y-barba";
     case "solo-barba":
       return "corte";
     case "solo-cejas":
-      return "base-barba-cejas";
+      return "barba-y-cejas";
     case "base":
       return "base-barba";
     case "base-barba":
@@ -53,10 +53,11 @@ function toggleBeard(service: ServiceKey): ServiceKey {
     case "base-cejas":
       return "base-barba-cejas";
     case "base-barba-cejas":
-    case "corte-y-barba":
-    case "barba-y-cejas":
-      // Quitando barba, volvemos a la variante sin barba equivalente
       return "base-cejas";
+    case "corte-y-barba":
+      return "corte";
+    case "barba-y-cejas":
+      return "solo-cejas";
     default:
       return service;
   }
@@ -70,7 +71,7 @@ function toggleEyebrows(service: ServiceKey): ServiceKey {
     case "solo-cejas":
       return "corte";
     case "solo-barba":
-      return "base-barba-cejas";
+      return "barba-y-cejas";
     case "base":
       return "base-cejas";
     case "base-cejas":
@@ -78,10 +79,11 @@ function toggleEyebrows(service: ServiceKey): ServiceKey {
     case "base-barba":
       return "base-barba-cejas";
     case "base-barba-cejas":
-    case "corte-y-barba":
-    case "barba-y-cejas":
-      // Quitando cejas, volvemos a la variante equivalente sin cejas
       return "base-barba";
+    case "corte-y-barba":
+      return "corte-completo";
+    case "barba-y-cejas":
+      return "solo-barba";
     default:
       return service;
   }
@@ -105,14 +107,33 @@ export function BookingForm() {
   const [savedBooking, setSavedBooking] = useState<BookingResponse["cita"] | null>(null);
   const [showSavedBooking, setShowSavedBooking] = useState(false);
 
+  const includeBeard = useMemo(
+    () =>
+      selectedService === "solo-barba" ||
+      selectedService === "base-barba" ||
+      selectedService === "corte-y-barba" ||
+      selectedService === "barba-y-cejas" ||
+      selectedService === "base-barba-cejas",
+    [selectedService],
+  );
+
+  const includeEyebrows = useMemo(
+    () =>
+      selectedService === "solo-cejas" ||
+      selectedService === "base-cejas" ||
+      selectedService === "barba-y-cejas" ||
+      selectedService === "base-barba-cejas",
+    [selectedService],
+  );
+
   const estimate = useMemo(
     () =>
       estimateHaircutPrice({
         haircutType: serviceByKey[selectedService].label,
-        includeBeard: selectedService === "base-barba" || selectedService === "base-barba-cejas",
-        includeEyebrows: selectedService === "base-cejas" || selectedService === "base-barba-cejas",
+        includeBeard,
+        includeEyebrows,
       }),
-    [selectedService],
+    [selectedService, includeBeard, includeEyebrows],
   );
 
   const refreshAvailability = useCallback(async () => {
@@ -155,8 +176,8 @@ export function BookingForm() {
           telefono: phone,
           correo: email,
           tipoCorte: serviceByKey[selectedService].label,
-          incluyeBarba: selectedService === "base-barba" || selectedService === "base-barba-cejas",
-          incluyeCejas: selectedService === "base-cejas" || selectedService === "base-barba-cejas",
+          incluyeBarba: includeBeard,
+          incluyeCejas: includeEyebrows,
           fechaCita: appointmentDate,
           horaCita: appointmentTime,
           notas: notes,

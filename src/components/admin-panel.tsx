@@ -82,6 +82,7 @@ export function AdminPanel() {
   const [clientHistory, setClientHistory] = useState<HistoryRecord[]>([]);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
@@ -100,29 +101,48 @@ export function AdminPanel() {
   }, []);
 
   const loadBookings = useCallback(async () => {
-    const response = await fetch("/api/bookings");
-    if (!response.ok) {
-      setBanner({ type: "error", message: "No se pudieron cargar las reservas." });
-      return;
-    }
+    try {
+      const response = await fetch("/api/bookings");
+      if (!response.ok) {
+        setBanner({ type: "error", message: "No se pudieron cargar las reservas." });
+        return;
+      }
 
-    const data = await readJsonResponse<{ citas: Booking[] }>(response);
-    setBookings(data.citas);
+      const data = await readJsonResponse<{ citas: Booking[] }>(response);
+      setBookings(data.citas);
+    } catch (error) {
+      console.error("Error al cargar reservas:", error);
+      setBanner({ type: "error", message: "Error de conexión al cargar las reservas." });
+    }
   }, []);
 
   const loadClients = useCallback(async () => {
-    const response = await fetch("/api/clientes");
-    if (!response.ok) {
-      setBanner({ type: "error", message: "No se pudieron cargar los clientes." });
-      return;
-    }
+    try {
+      const response = await fetch("/api/clientes");
+      if (!response.ok) {
+        setBanner({ type: "error", message: "No se pudieron cargar los clientes." });
+        return;
+      }
 
-    const data = await readJsonResponse<{ clientes: ClientSummary[] }>(response);
-    setClients(data.clientes);
+      const data = await readJsonResponse<{ clientes: ClientSummary[] }>(response);
+      setClients(data.clientes);
+    } catch (error) {
+      console.error("Error al cargar clientes:", error);
+      setBanner({ type: "error", message: "Error de conexión al cargar los clientes." });
+    }
   }, []);
 
   const loadDashboardData = useCallback(async () => {
-    await Promise.all([loadBookings(), loadClients()]);
+    setRefreshing(true);
+    setBanner({ type: "idle", message: "" });
+    try {
+      await Promise.all([loadBookings(), loadClients()]);
+    } catch (error) {
+      console.error("Error al cargar datos del dashboard:", error);
+      setBanner({ type: "error", message: "Error al cargar los datos." });
+    } finally {
+      setRefreshing(false);
+    }
   }, [loadBookings, loadClients]);
 
   useEffect(() => {
@@ -344,10 +364,11 @@ export function AdminPanel() {
           <div className="flex gap-3">
             <button
               onClick={refreshBookings}
+              disabled={refreshing}
               className="btn btn-secondary"
             >
-              <RefreshCcw className="h-4 w-4" />
-              Actualizar
+              <RefreshCcw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+              {refreshing ? "Actualizando..." : "Actualizar"}
             </button>
             <button
               onClick={handleLogout}
