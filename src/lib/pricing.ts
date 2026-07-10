@@ -3,7 +3,6 @@ export const eyebrowsAddOnPrice = 5000;
 
 export const haircutPackages = [
   { key: "corte", label: "Corte", price: 20000 },
-  { key: "corte-completo", label: "Corte completo", price: 20000 },
   { key: "solo-barba", label: "Solo barba", price: 8000 },
   { key: "solo-cejas", label: "Solo cejas", price: 5000 },
   { key: "base", label: "Base", price: 18000 },
@@ -15,7 +14,7 @@ export const haircutPackages = [
 ] as const;
 
 const haircutRates: Array<{ terms: string[]; price: number; label: string }> = [
-  { terms: ["corte", "corte completo"], price: 20000, label: "Corte completo" },
+  { terms: ["corte"], price: 20000, label: "Corte" },
   { terms: ["solo barba"], price: 8000, label: "Solo barba" },
   { terms: ["solo cejas"], price: 5000, label: "Solo cejas" },
   {

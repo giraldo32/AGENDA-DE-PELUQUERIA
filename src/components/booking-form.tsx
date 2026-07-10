@@ -40,7 +40,6 @@ const initialDate = getLocalDateString();
 function toggleBeard(service: ServiceKey): ServiceKey {
   switch (service) {
     case "corte":
-    case "corte-completo":
       return "corte-y-barba";
     case "solo-barba":
       return "corte";
@@ -66,7 +65,6 @@ function toggleBeard(service: ServiceKey): ServiceKey {
 function toggleEyebrows(service: ServiceKey): ServiceKey {
   switch (service) {
     case "corte":
-    case "corte-completo":
       return "solo-cejas";
     case "solo-cejas":
       return "corte";
@@ -81,7 +79,7 @@ function toggleEyebrows(service: ServiceKey): ServiceKey {
     case "base-barba-cejas":
       return "base-barba";
     case "corte-y-barba":
-      return "corte-completo";
+      return "corte";
     case "barba-y-cejas":
       return "solo-barba";
     default:
